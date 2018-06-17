@@ -1,0 +1,107 @@
+---
+- hosts: all
+  vars:
+    domain: ensectable.ch
+    new_hostname: insectman
+    # generate password hash with: 
+    # python -c "from passlib.hash import sha512_crypt; import getpass; print sha512_crypt.using(rounds=5000).hash(getpass.getpass())"
+    password_hash: $6$1WNGwG6IYD/tejWj$jh3Qh9McHx9czF2Xm/uZO1x62qTO1wUnF4MgdDUBnKigN.jgRx.F6O3V/ru4.MjKaxdOVrvGkN0gZc1Km7l.00
+  tasks:
+
+  #   # for home assistant
+  # - name: change password
+  #   become: yes
+  #   become_method: sudo
+  #   user:
+  #     name: pi
+  #     password: {{ password_hash }}
+  #     update_password: always
+
+  # - name: install necessary packages
+  #   become: yes
+  #   become_method: sudo
+  #   apt:
+  #     update_cache: yes
+  #     cache_valid_time: 86400
+  #     name: "{{ item }}"
+  #   with_items:
+  #     - vim
+  #     - emacs
+  #     - parcellite
+  #     - rsync
+  #     - git
+  #     - mupdf 
+  #     - mupdf-tools
+  #     - tor 
+  #     - tor-arm
+  #     - wiringpi
+
+  # - name: install latest version of important libraries
+  #   pip: name={{ item }} extra_args="--upgrade" executable=pip3
+  #   become: yes
+  #   become_method: sudo
+  #   with_items:
+  #     - rpi-rf
+
+  # - name: make ~/.homeassistant otherwise writeable
+  #   become: yes
+  #   become_method: sudo
+  #   file:
+  #     path: /home/homeassistant/.homeassistant/
+  #     mode: 0770
+
+  # - name: get 433utils
+  #   git:
+  #     repo: https://github.com/ninjablocks/433Utils
+  #     dest: "{{ ansible_env.HOME }}/github/433Utils"
+  #     recursive: yes
+
+  # - name: compile 433Utils
+  #   make:
+  #     chdir: "{{ ansible_env.HOME }}/github/433Utils/RPi_utils"
+  #     target: all
+
+  # - name: install 433Utils
+  #   file:
+  #     src: "{{ ansible_env.HOME }}/github/433Utils/RPi_utils/{{ item }}"
+  #     dest: "/usr/local/bin/{{ item }}"
+  #     state: link
+  #   with_items:
+  #     - codesend      
+  #     - send 
+  #     - RFSniffer 
+  #   become: yes
+  #   become_method: sudo
+
+
+  - name: upgrade homeassistant
+    shell: hassbian-config upgrade homeassistant
+    become: yes
+    become_method: sudo
+
+
+  - name: upgrade hassbian 
+    shell: hassbian-config upgrade hassbian
+    become: yes
+    become_method: sudo
+
+  # - name: change hostname to own
+  #   become: yes
+  #   become_method: sudo
+  #   replace:
+  #     path: /etc/hosts
+  #     after: '127\.0\..*$'
+  #     regexp: '127\.0\..*$'
+  #     replace: '127.0.1.1\t{{ domain }} {{ new_hostname }}'
+
+  # - name: rebooting things
+  #   shell: systemctl reboot
+  #   become: yes
+  #   become_method: sudo
+  #   async: 0
+  #   poll: 0
+
+  # - name: wait for rebooted computer to test for changes
+  #   local_action: wait_for host="{{ new_hostname }}.local" state=started
+
+  

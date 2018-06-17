@@ -1,0 +1,102 @@
+---
+- hosts: all
+  # run this: ansible-playbook -i raspberrypi.local, -u pi configure-ha-rpi.yaml
+  tasks:
+  - name: install latest udev rules
+    become: yes
+    become_method: sudo
+    get_url:
+      url: https://raw.githubusercontent.com/platformio/platformio-core/develop/scripts/99-platformio-udev.rules
+      dest: /etc/udev/rules.d/99-platformio-udev.rules
+      checksum: md5:f914ffef19ed3df117e615dc187b7754
+      owner: root
+
+  - name: install necessary packages
+    apt: name={{ item }}
+    become: yes
+    become_method: sudo
+    with_items:
+      - clang
+      - python-pip
+      - libusb-0.1-4
+      - python-backports.functools-lru-cache
+
+
+  # better use the ide for starters and make a soft link
+  - name: install necessary python packages
+    pip: name={{ item }} extra_args="--upgrade" executable=pip
+    become: yes
+    become_method: sudo
+    with_items:
+      - platformio
+
+  - name: put user in necessary groups
+    user: 
+      name: "{{ ansible_env.USER }}"
+      groups: dialout,plugdev
+      append: yes
+    become: yes
+
+
+  - name: stop bluetooth stuff
+    systemd: name={{ item }} state=stopped enabled=no
+    become: yes
+    with_items:
+      - hciuart
+      - bluetooth
+    when: ansible_lsb.id == "Raspbian"
+
+    # from: http://docs.platformio.org/en/latest/platforms/atmelavr.html
+  - name: set serial to on
+    command: raspi-config nonint dtoverlay=pi3-disable-bt
+    become: yes
+    become_method: sudo
+    when: ansible_lsb.id == "Raspbian"
+
+  - name: set uart according to https://www.raspberrypi.org/documentation/configuration/uart.md
+    lineinfile: dest="{{ item.dest }}" line="{{ item.line }}"
+    with_items:
+      - { dest: "/boot/config.txt", line: "enable_uart=1" }
+      - { dest: "/boot/config.txt", line: "dtoverlay=pi3-disable-bt" }
+    become: yes
+    when: ansible_lsb.id == "Raspbian"
+
+
+  - name: set uart according to 'https://hallard.me/enable-serial-port-on-raspberry-pi/'
+    replace:
+      path: /boot/config.txt
+      regexp: 'enable_uart=0'
+      replace: 'enable_uart=1' 
+      backup: yes
+    become: yes
+    when: ansible_lsb.id == "Raspbian"
+
+  # # SEE BELOW
+
+  # - name: set raspberry options
+  #   command: {{ item | quote }}
+  #   become: yes
+  #   become_method: sudo
+  #   with_items:
+  #     # - raspi-config nonint do_expand_rootfs
+  #     # - raspi-config nonint do_hostname {{ hostname }}
+  #     # - raspi-config nonint do_boot_behaviour B1
+  #     # - raspi-config nonint do_boot_behaviour B2
+  #     # - raspi-config nonint do_boot_behaviour B3
+  #     # - raspi-config nonint do_boot_behaviour B4
+  #     # - raspi-config nonint do_boot_wait 1
+  #     # - raspi-config nonint do_boot_splash 1
+  #     # - raspi-config nonint do_overscan 1
+  #     # - raspi-config nonint do_camera 1
+  #     # - raspi-config nonint do_ssh 1
+  #     # - raspi-config nonint do_vnc 1
+  #     # - raspi-config nonint do_spi 1
+  #     # - raspi-config nonint do_i2c 1
+  #     - raspi-config nonint do_serial 1
+  #     # - raspi-config nonint do_onewire 1
+  #     # - raspi-config nonint do_rgpio 1
+  #     # - raspi-config nonint do_overclock %s
+  #     # - raspi-config nonint do_memory_split 1
+  #     # - raspi-config nonint do_resolution %d %d
+  #     # - raspi-config nonint do_wifi_country %s
+

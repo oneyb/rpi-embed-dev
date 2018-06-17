@@ -1,0 +1,40 @@
+# Building a Raspberry Pi Gateway
+# from: https://www.mysensors.org/build/raspberry
+---
+- hosts: all
+  # run this: ansible-playbook -i hassbian.local, -u pi install-mysensors-gateway-raspberry.yaml
+  tasks:
+  - name: get MySensors
+    git:
+      dest: mysensors
+      repo: https://github.com/mysensors/MySensors
+      # version: development
+
+  - name: Build mysgw
+    command: "{{ item }} chdir=mysensors"
+    with_items:
+    - "./configure  --my-gateway=serial --my-serial-is-pty --my-serial-pty=/dev/ttyUSBMySensorsGateway --my-transport=nrf24 --my-rf24-irq-pin=15 --my-serial-groupname=dialout"
+    # - "./configure  --my-gateway=serial --my-serial-is-pty --my-serial-pty=/dev/ttyUSBMySensorsGateway --my-transport=nrf24 --my-rf24-irq-pin=15"
+    # - "./configure  --my-gateway=serial --my-serial-is-pty --my-serial-pty=/dev/ttyUSBMySensorsGateway --my-rf24-irq-pin=15 --my-leds-err-pin=12 --my-leds-rx-pin=16 --my-leds-tx-pin=18"
+    # - "./configure --my-gateway=ethernet --my-port=5003"
+    # - "./configure --my-gateway=mqtt --my-controller-ip-address=127.0.0.1 --my-mqtt-publish-topic-prefix=mysensors-out --my-mqtt-subscribe-topic-prefix=mysensors-in --my-mqtt-client-id=mygateway1
+    - make
+    ignore_errors: true
+    register: mysgw
+
+  - name: check configure output
+    debug:
+      msg: "{{ mysgw }}"
+
+  - name: install mysgw
+    become: yes
+    make:
+      target: install
+      chdir: mysensors
+
+  - name: enable mysgw
+    systemd: name={{ item }} state=restarted enabled=yes
+    become: yes
+    with_items:
+      - mysgw
+

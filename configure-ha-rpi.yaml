@@ -1,8 +1,9 @@
 ---
 - hosts: all
+  # run this: ansible-playbook -i hassbian.local, -u pi configure-ha-rpi.yaml
   vars:
-    domain: ensectable.ch
-    new_hostname: insectman
+    # domain: fixthebugs.com
+    # new_hostname: pesticidal
     # generate password hash with: 
     # python -c "from passlib.hash import sha512_crypt; import getpass; print sha512_crypt.using(rounds=5000).hash(getpass.getpass())"
     password_hash: $6$1WNGwG6IYD/tejWj$jh3Qh9McHx9czF2Xm/uZO1x62qTO1wUnF4MgdDUBnKigN.jgRx.F6O3V/ru4.MjKaxdOVrvGkN0gZc1Km7l.00

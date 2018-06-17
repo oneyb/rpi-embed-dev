@@ -1,0 +1,26 @@
+* The Raspberry Pi as a tool for embedded development
+
+This repository contains my ansible playbooks and Home Assistant
+configuration. I use the RPi to both compile and upload firmware to
+microcontrollers with Platformio, but also a MySensors gateway to receive
+sensor data. These playbooks document my configuration of the RPi for these
+purposes. In case something breaks I can be up and running quickly.
+
+*Ansible 2.4 or greater is required.*
+
+* Examples
+
+** Quick install of the MySensors gateway for a RPi (running Hassbian)
+#+BEGIN_SRC shell
+ansible-playbook -i hassbian.local, -u pi install-mysensors-gateway-raspberry.yaml
+#+END_SRC
+
+** Quick install of Platformio
+#+BEGIN_SRC shell
+ansible-playbook -i raspberrypi.local, -u pi install-platformio.yaml
+#+END_SRC
+
+** Setup and Maintenance of Hassbian/Home Assistant
+#+BEGIN_SRC shell
+ansible-playbook -i hassbian.local, -u pi configure-ha-rpi.yaml
+#+END_SRC

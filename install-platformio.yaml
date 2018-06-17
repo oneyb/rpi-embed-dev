@@ -1,6 +1,6 @@
 ---
 - hosts: all
-  # run this: ansible-playbook -i raspberrypi.local, -u pi configure-ha-rpi.yaml
+  # run this: ansible-playbook -i raspberrypi.local, -u pi install-platformio.yaml
   tasks:
   - name: install latest udev rules
     become: yes

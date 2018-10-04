@@ -4,7 +4,6 @@
   tasks:
   - name: install latest udev rules
     become: yes
-    become_method: sudo
     get_url:
       url: https://raw.githubusercontent.com/platformio/platformio-core/develop/scripts/99-platformio-udev.rules
       dest: /etc/udev/rules.d/99-platformio-udev.rules
@@ -14,7 +13,6 @@
   - name: install necessary packages
     apt: name={{ item }}
     become: yes
-    become_method: sudo
     with_items:
       - clang
       - python-pip
@@ -26,7 +24,6 @@
   - name: install necessary python packages
     pip: name={{ item }} extra_args="--upgrade" executable=pip
     become: yes
-    become_method: sudo
     with_items:
       - platformio
 
@@ -50,7 +47,6 @@
   - name: set serial to on
     command: raspi-config nonint dtoverlay=pi3-disable-bt
     become: yes
-    become_method: sudo
     when: ansible_lsb.id == "Raspbian"
 
   - name: set uart according to https://www.raspberrypi.org/documentation/configuration/uart.md
@@ -76,7 +72,6 @@
   # - name: set raspberry options
   #   command: {{ item | quote }}
   #   become: yes
-  #   become_method: sudo
   #   with_items:
   #     # - raspi-config nonint do_expand_rootfs
   #     # - raspi-config nonint do_hostname {{ hostname }}
